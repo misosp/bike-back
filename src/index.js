@@ -20,19 +20,50 @@ export default {
                 // Parse Multipart Form Data
                 const formData = await request.formData();
 
+                const bikeNo = formData.get("bikeNo");
                 const applicantName = formData.get("applicantName");
                 const phone = formData.get("phone");
                 const email = formData.get("email");
+                const plan = formData.get("plan");
+                const payment = formData.get("payment");
                 const adText = formData.get("adText");
                 const adImage = formData.get("adImage");
+                const termsAccepted = formData.get("termsAccepted"); // "on" 想定（任意扱い推奨）
 
-                // VALIDATION: Check required fields
-                if (!applicantName || !phone || !email || !adText || !adImage) {
+                // REQUIRED FIELDS
+                if (!bikeNo || !applicantName || !phone || !email || !plan || !payment || !adText || !adImage) {
                     return new Response(JSON.stringify({ error: "Missing required fields" }), {
                         status: 400,
                         headers: { ...corsHeaders, "Content-Type": "application/json" },
                     });
                 }
+
+                // ALLOW LIST VALIDATION
+                const planLabelMap = {
+                    "1month_10000": "1カ月（10,000円）",
+                    "6months_55000": "6カ月（55,000円）",
+                    "12months_100000": "12カ月（100,000円）",
+                };
+                const paymentLabelMap = {
+                    "bank": "振込決済",
+                    "credit": "クレジット決済（Stripe）",
+                };
+
+                if (!planLabelMap[plan]) {
+                    return new Response(JSON.stringify({ error: "Invalid plan" }), {
+                        status: 400,
+                        headers: { ...corsHeaders, "Content-Type": "application/json" },
+                    });
+                }
+                if (!paymentLabelMap[payment]) {
+                    return new Response(JSON.stringify({ error: "Invalid payment" }), {
+                        status: 400,
+                        headers: { ...corsHeaders, "Content-Type": "application/json" },
+                    });
+                }
+
+                const planLabel = planLabelMap[plan];
+                const paymentLabel = paymentLabelMap[payment];
 
                 // VALIDATION: Email format
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -104,7 +135,7 @@ export default {
                 const imageUrl = `${baseUrl}/${key}`;
 
                 // SLACK NOTIFICATION logic
-                const slackMessage = `📩 新規広告申込み\n\n法人名/氏名：${applicantName}\n電話番号：${phone}\nメール：${email}\n\n広告内容：\n${adText}\n\n広告画像：\n${imageUrl}`;
+                const slackMessage = `📩 新規広告申込み\n\n自転車No：${bikeNo}\n法人名/氏名：${applicantName}\n電話番号：${phone}\nメール：${email}\n\n掲載期間・金額：${planLabel}\n支払い方法：${paymentLabel}\n\n広告内容：\n${adText}\n\n広告画像：\n${imageUrl}`;
 
                 const slackResponse = await fetch(env.SLACK_WEBHOOK_URL, {
                     method: "POST",

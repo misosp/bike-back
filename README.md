@@ -64,11 +64,15 @@ echo dummy > test-image.jpg
 
 :: リクエスト送信
 curl.exe -v -X POST https://ad-bike-back.<your-subdomain>.workers.dev/api/apply ^
+  -F "bikeNo=12345" ^
   -F "applicantName=株式会社テスト" ^
   -F "phone=090-1234-5678" ^
   -F "email=test@example.com" ^
+  -F "plan=1month_10000" ^
+  -F "payment=bank" ^
   -F "adText=テスト広告です。よろしくお願いします。" ^
-  -F "adImage=@test-image.jpg;type=image/jpeg"
+  -F "adImage=@test-image.jpg;type=image/jpeg" ^
+  -F "termsAccepted=on"
 ```
 
 **Bash / Mac / Linux:**
@@ -79,11 +83,15 @@ echo "dummy" > test-image.jpg
 
 # リクエスト送信
 curl -v -X POST https://ad-bike-back.<your-subdomain>.workers.dev/api/apply \
+  -F "bikeNo=12345" \
   -F "applicantName=株式会社テスト" \
   -F "phone=090-1234-5678" \
   -F "email=test@example.com" \
+  -F "plan=1month_10000" \
+  -F "payment=bank" \
   -F "adText=テスト広告です。よろしくお願いします。" \
-  -F "adImage=@test-image.jpg;type=image/jpeg"
+  -F "adImage=@test-image.jpg;type=image/jpeg" \
+  -F "termsAccepted=on"
 ```
 
 **確認事項:**
